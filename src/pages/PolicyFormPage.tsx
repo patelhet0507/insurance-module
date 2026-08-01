@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,8 +88,14 @@ export function PolicyFormPage() {
     if (!canSubmit) return;
     setSaving(true);
     try {
+      const num = form.policyNumber.trim();
+      const dup = await getDocs(query(collection(db, "policies"), where("policyNumber", "==", num)));
+      if (dup.docs.some((d) => d.id !== id)) {
+        notifyError("A policy with this number already exists");
+        return;
+      }
       const payload = {
-        policyNumber: form.policyNumber.trim(),
+        policyNumber: num,
         customerId: form.customerId,
         companyId: form.companyId,
         insuranceTypeId: form.insuranceTypeId,
@@ -113,9 +121,7 @@ export function PolicyFormPage() {
     } finally {
       setSaving(false);
     }
-  }
-
-  if (isEdit && polLoading) {
+  }  if (isEdit && polLoading) {
     return <Skeleton className="h-96 w-full" />;
   }
 

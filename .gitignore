@@ -8,3 +8,6 @@ dist-ssr
 firebase-debug.log
 .firebase
 *.tsbuildinfo
+
+.vercel
+.env*

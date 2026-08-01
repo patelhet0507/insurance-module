@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
+import { useRenewalEngine } from "@/hooks/useRenewalEngine";
 
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  useRenewalEngine();
 
   return (
     <div className="flex min-h-screen">

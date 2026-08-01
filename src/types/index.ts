@@ -88,6 +88,7 @@ export interface Notification {
   title: string;
   message?: string;
   link?: string;
+  key?: string;
   read: boolean;
   createdAt: string;
 }

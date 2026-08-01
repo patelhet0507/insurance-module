@@ -28,7 +28,7 @@ export function useCollection<T extends object>(path: string, ...constraints: Qu
     const unsub = onSnapshot(
       q,
       (snap) => {
-        setDocs(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as FirestoreDoc<T>));
+        setDocs(snap.docs.map((d) => ({ id: d.id, ...normalizeData(d.data()) }) as FirestoreDoc<T>));
         setLoading(false);
       },
       (err) => {
@@ -52,7 +52,7 @@ export function useDoc<T extends object>(path: string) {
     const unsub = onSnapshot(
       ref,
       (snap) => {
-        setDocData(snap.exists() ? ({ id: snap.id, ...snap.data() } as FirestoreDoc<T>) : null);
+        setDocData(snap.exists() ? ({ id: snap.id, ...normalizeData(snap.data()) } as FirestoreDoc<T>) : null);
         setLoading(false);
       },
       (err) => {
@@ -114,12 +114,20 @@ export function useRemove() {
   return { remove, removing };
 }
 
-/** Firestore stores serverTimestamp() as Timestamp on read; normalize to ISO string. */
-export function tsToIso(value: unknown): string | null {
-  if (!value) return null;
-  if (value instanceof Object && "seconds" in (value as { seconds?: number }) && (value as { seconds?: number }).seconds != null) {
-    return new Date((value as { seconds: number }).seconds * 1000).toISOString();
+/** Firestore stores serverTimestamp() as a Timestamp; convert any Timestamp values to ISO strings. */
+function normalizeData(data: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data)) {
+    out[k] = isTimestamp(v) ? new Date(v.seconds * 1000).toISOString() : v;
   }
-  if (typeof value === "string") return value;
-  return null;
+  return out;
+}
+
+function isTimestamp(v: unknown): v is { seconds: number } {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    "seconds" in (v as { seconds?: unknown }) &&
+    typeof (v as { seconds?: unknown }).seconds === "number"
+  );
 }
