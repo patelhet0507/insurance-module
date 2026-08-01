@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return signedIn() && role() == 'admin';
+    }
+
+    function canWrite() {
+      // staff + admin; viewer is read-only
+      return signedIn() && role() in ['admin', 'staff'];
+    }
+
+    // ---- Users ----
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ---- Settings (admin only write) ----
+    match /settings/{doc} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- Everything else: staff+ write, everyone signed-in reads ----
+    match /companies/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
+    match /brokers/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
+    match /customers/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
+    match /insuranceTypes/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
+    match /policies/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
+    match /reminders/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
+    match /notifications/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
+    match /activityLogs/{doc} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+  }
+}
