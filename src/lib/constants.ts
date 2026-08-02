@@ -36,4 +36,4 @@ export const REMINDER_CHANNEL_LABEL: Record<ReminderChannel, string> = {
   sms: "SMS",
 };
 
-export const CURRENCIES = ["USD", "EUR", "GBP", "AED", "SAR"] as const;
+export const CURRENCIES = ["INR"] as const;
