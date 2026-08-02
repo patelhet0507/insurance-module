@@ -1,11 +1,7 @@
 {
   "headers": [
     {
-      "source": "/",
-      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0" }]
-    },
-    {
-      "source": "/index.html",
+      "source": "/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0" }]
     }
   ],

@@ -33,19 +33,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let unsubProfile: (() => void) | undefined;
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
         // subscribe to profile for live role changes
-        const unsubProfile = onSnapshot(doc(db, "users", u.uid), (snap) => {
-          setProfile(snap.exists() ? (snap.data() as UserProfile) : null);
-        });
-        return () => unsubProfile();
+        unsubProfile = onSnapshot(
+          doc(db, "users", u.uid),
+          (snap) => {
+            setProfile(snap.exists() ? (snap.data() as UserProfile) : null);
+            setLoading(false);
+          },
+          () => {
+            setProfile(null);
+            setLoading(false);
+          }
+        );
+        return;
       }
       setProfile(null);
       setLoading(false);
     });
-    return unsub;
+    return () => {
+      unsubProfile?.();
+      unsub();
+    };
   }, []);
 
   async function login(email: string, password: string) {
