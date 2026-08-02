@@ -12,6 +12,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  Tags,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -27,6 +28,7 @@ const navItems = [
   { to: "/customers", label: "Customers", icon: Users },
   { to: "/companies", label: "Companies", icon: Building2 },
   { to: "/brokers", label: "Brokers", icon: Handshake },
+  { to: "/insurance-types", label: "Insurance Types", icon: Tags },
   { to: "/reminders", label: "Reminders", icon: Bell },
 ];
 

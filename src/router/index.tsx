@@ -22,6 +22,7 @@ const BrokersPage = lazyNamed(() => import("@/pages/BrokersPage"), "BrokersPage"
 const RemindersPage = lazyNamed(() => import("@/pages/RemindersPage"), "RemindersPage");
 const NotificationsPage = lazyNamed(() => import("@/pages/NotificationsPage"), "NotificationsPage");
 const SettingsPage = lazyNamed(() => import("@/pages/SettingsPage"), "SettingsPage");
+const InsuranceTypesPage = lazyNamed(() => import("@/pages/InsuranceTypesPage"), "InsuranceTypesPage");
 
 function Page({ children }: { children: ReactNode }) {
   return (
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
       { path: "brokers", element: <Page><BrokersPage /></Page> },
       { path: "reminders", element: <Page><RemindersPage /></Page> },
       { path: "notifications", element: <Page><NotificationsPage /></Page> },
+      { path: "insurance-types", element: <Page><InsuranceTypesPage /></Page> },
       { path: "settings", element: <Page><SettingsPage /></Page> },
     ],
   },
