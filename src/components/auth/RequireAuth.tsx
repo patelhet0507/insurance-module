@@ -17,7 +17,6 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
 export function RedirectIfAuthed({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return null;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (!loading && user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }

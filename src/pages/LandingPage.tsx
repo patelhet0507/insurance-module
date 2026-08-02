@@ -14,8 +14,7 @@ const features = [
 
 export function LandingPage() {
   const { user, loading } = useAuth();
-  if (loading) return null;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (!loading && user) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
