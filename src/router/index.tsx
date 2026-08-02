@@ -22,6 +22,7 @@ const CustomersPage = lazyNamed(() => import("@/pages/CustomersPage"), "Customer
 const CompaniesPage = lazyNamed(() => import("@/pages/CompaniesPage"), "CompaniesPage");
 const BrokersPage = lazyNamed(() => import("@/pages/BrokersPage"), "BrokersPage");
 const RemindersPage = lazyNamed(() => import("@/pages/RemindersPage"), "RemindersPage");
+const ReportsPage = lazyNamed(() => import("@/pages/ReportsPage"), "ReportsPage");
 const NotificationsPage = lazyNamed(() => import("@/pages/NotificationsPage"), "NotificationsPage");
 const SettingsPage = lazyNamed(() => import("@/pages/SettingsPage"), "SettingsPage");
 const InsuranceTypesPage = lazyNamed(() => import("@/pages/InsuranceTypesPage"), "InsuranceTypesPage");
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
       { path: "companies", element: <Page><CompaniesPage /></Page> },
       { path: "brokers", element: <Page><BrokersPage /></Page> },
       { path: "reminders", element: <Page><RemindersPage /></Page> },
+      { path: "reports", element: <Page><ReportsPage /></Page> },
       { path: "notifications", element: <Page><NotificationsPage /></Page> },
       { path: "insurance-types", element: <Page><InsuranceTypesPage /></Page> },
       { path: "settings", element: <Page><SettingsPage /></Page> },

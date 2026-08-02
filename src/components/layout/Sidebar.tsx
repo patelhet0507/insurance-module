@@ -13,6 +13,7 @@ import {
   Moon,
   Sun,
   Tags,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -30,6 +31,7 @@ const navItems = [
   { to: "/brokers", label: "Brokers", icon: Handshake },
   { to: "/insurance-types", label: "Insurance Types", icon: Tags },
   { to: "/reminders", label: "Reminders", icon: Bell },
+  { to: "/reports", label: "Reports", icon: BarChart3 },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
