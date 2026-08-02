@@ -27,7 +27,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
         className="absolute inset-0 bg-black/50"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg border bg-card p-6 shadow-lg">
+      <div className="relative z-10 m-4 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg border bg-card p-6 shadow-lg">
         {children}
         <button
           onClick={() => onOpenChange(false)}

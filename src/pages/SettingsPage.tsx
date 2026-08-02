@@ -21,7 +21,7 @@ import { useSettings, useUsers } from "@/hooks/useData";
 import { useUpdate } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canManageUsers, canWrite, canEditUser } from "@/context/AuthContext";
-import { ROLES, ROLE_LABEL, REMINDER_CHANNELS, REMINDER_CHANNEL_LABEL } from "@/lib/constants";
+import { ROLES, ROLE_LABEL, REMINDER_CHANNELS, REMINDER_CHANNEL_LABEL, CURRENCIES } from "@/lib/constants";
 import { notifyError, notifySuccess } from "@/components/ui/toast";
 import type { Role } from "@/types";
 
@@ -36,7 +36,7 @@ export function SettingsPage() {
 
   const [form, setForm] = useState({
     companyName: "",
-    currency: "USD",
+    currency: "INR",
     defaultReminderDays: "30",
   });
   const [channels, setChannels] = useState<string[]>([]);
@@ -46,7 +46,7 @@ export function SettingsPage() {
     if (settings) {
       setForm({
         companyName: settings.companyName || "",
-        currency: settings.currency || "USD",
+        currency: settings.currency || "INR",
         defaultReminderDays: String(settings.defaultReminderDays ?? 30),
       });
       setChannels(settings.reminderChannels ?? ["app"]);
@@ -96,11 +96,11 @@ export function SettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="currency">Currency</Label>
                 <Select id="currency" value={form.currency} onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="AED">AED</option>
-                  <option value="SAR">SAR</option>
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
                 </Select>
               </div>
               <div className="space-y-2">

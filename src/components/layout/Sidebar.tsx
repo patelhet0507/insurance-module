@@ -32,7 +32,7 @@ const navItems = [
   { to: "/reminders", label: "Reminders", icon: Bell },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -52,8 +52,12 @@ export function Sidebar() {
     navigate("/login");
   }
 
+  const asideClass = onNavigate
+    ? "flex w-64 flex-col border-r bg-card"
+    : "hidden w-64 flex-col border-r bg-card md:flex";
+
   return (
-    <aside className="hidden w-64 flex-col border-r bg-card md:flex">
+    <aside className={asideClass}>
       <div className="flex h-14 items-center gap-2 border-b px-6">
         <ShieldCheck className="h-6 w-6 text-primary" />
         <span className="text-base font-semibold">{APP_NAME}</span>
@@ -64,6 +68,7 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             end={item.to === "/dashboard"}
+            onClick={onNavigate}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -80,6 +85,7 @@ export function Sidebar() {
         <div className="pt-4">
           <NavLink
             to="/settings"
+            onClick={onNavigate}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",

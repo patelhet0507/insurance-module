@@ -38,7 +38,7 @@ export function LandingPage() {
             Track your insurance policies, customers and companies, and get reminded automatically before
             every renewal date.
           </p>
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <Link to="/login">
                 Get started <ArrowRight className="h-4 w-4" />
