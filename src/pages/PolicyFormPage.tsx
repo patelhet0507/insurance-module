@@ -38,6 +38,7 @@ export function PolicyFormPage() {
   const [form, setForm] = useState({
     policyNumber: "",
     customerId: "",
+    insuredSubject: "",
     companyId: "",
     insuranceTypeId: "",
     brokerId: "",
@@ -55,6 +56,7 @@ export function PolicyFormPage() {
       setForm({
         policyNumber: policy.policyNumber || "",
         customerId: policy.customerId || "",
+        insuredSubject: policy.insuredSubject || "",
         companyId: policy.companyId || "",
         insuranceTypeId: policy.insuranceTypeId || "",
         brokerId: policy.brokerId || "",
@@ -75,6 +77,7 @@ export function PolicyFormPage() {
     () =>
       form.policyNumber.trim() &&
       form.customerId &&
+      form.insuredSubject.trim() &&
       form.companyId &&
       form.insuranceTypeId &&
       form.premium &&
@@ -97,6 +100,7 @@ export function PolicyFormPage() {
       const payload = {
         policyNumber: num,
         customerId: form.customerId,
+        insuredSubject: form.insuredSubject.trim() || null,
         companyId: form.companyId,
         insuranceTypeId: form.insuranceTypeId,
         brokerId: form.brokerId || null,
@@ -172,6 +176,10 @@ export function PolicyFormPage() {
                   </option>
                 ))}
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="insuredSubject">Insured Subject *</Label>
+              <Input id="insuredSubject" required value={form.insuredSubject} onChange={set("insuredSubject")} placeholder="What or where is insured? e.g. Shop, Car, House, Factory…" className={input} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="companyId">Insurance Company *</Label>

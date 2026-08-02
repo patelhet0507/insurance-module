@@ -63,6 +63,7 @@ export interface Policy {
   id: string;
   policyNumber: string;
   customerId: string;
+  insuredSubject?: string;
   companyId: string;
   insuranceTypeId: string;
   brokerId?: string;
