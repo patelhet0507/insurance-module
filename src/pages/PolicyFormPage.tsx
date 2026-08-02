@@ -11,13 +11,21 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { usePolicies, useCustomers, useCompanies, useBrokers, useInsuranceTypes, usePolicy } from "@/hooks/useData";
 import { useCreate, useUpdate } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
 import { CURRENCIES, POLICY_TERMS, POLICY_TERM_MONTHS, PAYMENT_MODES } from "@/lib/constants";
 import { notifyError, notifySuccess } from "@/components/ui/toast";
-import { nowIso, customerDisplayName } from "@/lib/utils";
+import { nowIso, customerDisplayName, formatCurrency } from "@/lib/utils";
 import dayjs from "dayjs";
 import type { Policy, PolicyStatus } from "@/types";
 
@@ -166,6 +174,23 @@ export function PolicyFormPage() {
 
   const input = "bg-background";
 
+  const quarterly = form.term === "quarterly";
+  const quarterRows = useMemo(() => {
+    if (!quarterly || !form.startDate || !form.premium) return null;
+    const qty = parseFloat(form.premium);
+    if (!qty || qty <= 0) return null;
+    const start = dayjs(form.startDate);
+    return Array.from({ length: 4 }, (_, i) => {
+      const s = start.add(i * 3, "month");
+      const e = start.add((i + 1) * 3, "month").subtract(1, "day");
+      return {
+        q: `Q${i + 1}`,
+        period: `${s.format("MMM D, YYYY")} – ${e.format("MMM D, YYYY")}`,
+        amount: qty,
+      };
+    });
+  }, [quarterly, form.startDate, form.premium]);
+
   return (
     <div className="space-y-6">
       <PageHeader title={isEdit ? "Edit Policy" : "New Policy"}>
@@ -288,6 +313,38 @@ export function PolicyFormPage() {
               <Textarea id="notes" value={form.notes} onChange={set("notes")} placeholder="Optional notes…" className={input} />
             </div>
           </CardContent>
+          {quarterRows && (
+            <CardContent>
+              <div className="overflow-auto rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Quarter</TableHead>
+                      <TableHead>Period</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {quarterRows.map((r) => (
+                      <TableRow key={r.q}>
+                        <TableCell className="font-medium">{r.q}</TableCell>
+                        <TableCell>{r.period}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(r.amount, form.currency)}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={2} className="font-semibold">
+                        Total (Yearly)
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {formatCurrency(quarterRows[0].amount * 4, form.currency)}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          )}
         </Card>
 
         <div className="flex justify-end gap-2">

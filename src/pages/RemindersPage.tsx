@@ -19,9 +19,19 @@ import { useRemove, useUpdate } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
 import { REMINDER_STATUS } from "@/lib/constants";
-import { formatDate } from "@/lib/utils";
+import { formatDate, daysUntil } from "@/lib/utils";
 import { notifySuccess } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 import type { ReminderStatus } from "@/types";
+
+const WINDOWS = [
+  { value: "all", label: "All" },
+  { value: "near30", label: "±30 days" },
+  { value: "next30", label: "Next 30 days" },
+  { value: "next60", label: "Next 60 days" },
+  { value: "next90", label: "Next 90 days" },
+] as const;
+type Window = (typeof WINDOWS)[number]["value"];
 
 export function RemindersPage() {
   const { profile } = useAuth();
@@ -31,16 +41,31 @@ export function RemindersPage() {
   const { remove } = useRemove();
 
   const [statusFilter, setStatusFilter] = useState<"all" | ReminderStatus>("all");
+  const [windowFilter, setWindowFilter] = useState<Window>("all");
 
   const writable = canWrite(profile?.role);
 
-  const filtered = useMemo(
-    () =>
-      [...reminders]
-        .filter((r) => statusFilter === "all" || r.status === statusFilter)
-        .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()),
-    [reminders, statusFilter]
-  );
+  const filtered = useMemo(() => {
+    const rows = [...reminders].filter((r) => {
+      if (statusFilter !== "all" && r.status !== statusFilter) return false;
+      if (windowFilter === "all") return true;
+      const d = daysUntil(r.dueDate);
+      if (d == null) return false;
+      switch (windowFilter) {
+        case "near30":
+          return Math.abs(d) <= 30;
+        case "next30":
+          return d >= 0 && d <= 30;
+        case "next60":
+          return d >= 0 && d <= 60;
+        case "next90":
+          return d >= 0 && d <= 90;
+        default:
+          return true;
+      }
+    });
+    return rows.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  }, [reminders, statusFilter, windowFilter]);
 
   const policyNumber = (id: string) => policies.find((p) => p.id === id)?.policyNumber ?? "—";
 
@@ -57,7 +82,7 @@ export function RemindersPage() {
     <div className="space-y-6">
       <PageHeader title="Reminders" description="Renewal and follow-up reminders" />
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Bell className="h-4 w-4 text-muted-foreground" />
         <Select
           value={statusFilter}
@@ -71,6 +96,22 @@ export function RemindersPage() {
             </option>
           ))}
         </Select>
+        <div className="flex flex-wrap gap-1">
+          {WINDOWS.map((w) => (
+            <Button
+              key={w.value}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "rounded-full px-3",
+                windowFilter === w.value && "bg-accent text-accent-foreground"
+              )}
+              onClick={() => setWindowFilter(w.value)}
+            >
+              {w.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
