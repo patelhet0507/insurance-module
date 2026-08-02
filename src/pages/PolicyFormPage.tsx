@@ -160,21 +160,7 @@ export function PolicyFormPage() {
     } finally {
       setSaving(false);
     }
-  }  if (isEdit && polLoading) {
-    return <Skeleton className="h-96 w-full" />;
-  }
-
-  if (isEdit && !policy) {
-    return <div className="text-muted-foreground">Policy not found.</div>;
-  }
-
-  if (!writable) {
-    return <div className="text-muted-foreground">You don't have permission to edit policies.</div>;
-  }
-
-  const input = "bg-background";
-
-  const quarterly = form.term === "quarterly";
+  }  const quarterly = form.term === "quarterly";
   const quarterRows = useMemo(() => {
     if (!quarterly || !form.startDate || !form.premium) return null;
     const qty = parseFloat(form.premium);
@@ -190,6 +176,20 @@ export function PolicyFormPage() {
       };
     });
   }, [quarterly, form.startDate, form.premium]);
+
+  if (isEdit && polLoading) {
+    return <Skeleton className="h-96 w-full" />;
+  }
+
+  if (isEdit && !policy) {
+    return <div className="text-muted-foreground">Policy not found.</div>;
+  }
+
+  if (!writable) {
+    return <div className="text-muted-foreground">You don't have permission to edit policies.</div>;
+  }
+
+  const input = "bg-background";
 
   return (
     <div className="space-y-6">
