@@ -67,7 +67,7 @@ export function DashboardPage() {
     { label: "Expiring Soon (30d)", value: stats.expiringSoon, icon: AlertTriangle, danger: stats.expiringSoon > 0 },
     { label: "Expired", value: stats.expired, icon: AlertTriangle, danger: stats.expired > 0 },
     { label: "Customers", value: customers.length, icon: Users },
-    { label: "Companies", value: companies.length, icon: Building2 },
+    { label: "Insurance Companies", value: companies.length, icon: Building2 },
     { label: "Brokers", value: brokers.length, icon: Handshake },
   ];
 

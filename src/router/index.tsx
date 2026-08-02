@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthProvider } from "@/context/AuthContext";
 import { RequireAuth, RedirectIfAuthed } from "@/components/auth/RequireAuth";
+import { RouteError } from "@/components/shared/RouteError";
 
 function lazyNamed<T extends string>(loader: () => Promise<Record<T, ComponentType>>, name: T) {
   return lazy(async () => {
@@ -41,6 +42,7 @@ function Page({ children }: { children: ReactNode }) {
 export const router = createBrowserRouter([
   {
     path: "/login",
+    errorElement: <RouteError />,
     element: (
       <RedirectIfAuthed>
         <LoginPage />
@@ -48,6 +50,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    errorElement: <RouteError />,
     element: (
       <RequireAuth>
         <AppLayout />

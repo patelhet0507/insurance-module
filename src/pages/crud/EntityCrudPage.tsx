@@ -34,6 +34,7 @@ export interface EntityField {
 
 export interface EntityConfig {
   title: string;
+  singular: string;
   description: string;
   path: string;
   fields: EntityField[];
@@ -85,10 +86,10 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
       const payload: Record<string, unknown> = { ...form };
       if (editing) {
         await update(`${config.path}/${editing.id}`, payload);
-        notifySuccess(`${config.title.slice(0, -1)} updated`);
+        notifySuccess(`${config.singular} updated`);
       } else {
         await create(payload);
-        notifySuccess(`${config.title.slice(0, -1)} created`);
+        notifySuccess(`${config.singular} created`);
       }
       setDialogOpen(false);
     } finally {
@@ -109,7 +110,7 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
       <PageHeader title={config.title} description={config.description}>
         {writable && (
           <Button onClick={openCreate}>
-            <Plus className="h-4 w-4" /> New {config.title.slice(0, -1)}
+            <Plus className="h-4 w-4" /> New {config.singular}
           </Button>
         )}
       </PageHeader>
@@ -178,7 +179,7 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogHeader>
-          <DialogTitle>{editing ? `Edit ${config.title.slice(0, -1)}` : `New ${config.title.slice(0, -1)}`}</DialogTitle>
+          <DialogTitle>{editing ? `Edit ${config.singular}` : `New ${config.singular}`}</DialogTitle>
         </DialogHeader>
         <form onSubmit={save} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -210,7 +211,7 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={`Delete ${config.title.slice(0, -1).toLowerCase()}?`}
+        title={`Delete ${config.singular.toLowerCase()}?`}
         description="This action cannot be undone."
         confirmLabel="Delete"
         destructive

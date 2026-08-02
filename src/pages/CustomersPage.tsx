@@ -2,6 +2,7 @@ import { EntityCrudPage } from "@/pages/crud/EntityCrudPage";
 
 const config = {
   title: "Customers",
+  singular: "Customer",
   description: "Manage your insurance customers",
   path: "customers",
   fields: [

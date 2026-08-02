@@ -26,7 +26,7 @@ const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/policies", label: "Policies", icon: FileText },
   { to: "/customers", label: "Customers", icon: Users },
-  { to: "/companies", label: "Companies", icon: Building2 },
+  { to: "/companies", label: "Insurance Companies", icon: Building2 },
   { to: "/brokers", label: "Brokers", icon: Handshake },
   { to: "/insurance-types", label: "Insurance Types", icon: Tags },
   { to: "/reminders", label: "Reminders", icon: Bell },

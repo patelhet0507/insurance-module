@@ -20,10 +20,20 @@ service cloud.firestore {
     }
 
     // ---- Users ----
+    // Self-service profile doc: signed-in user may read/write only their own.
+    // Role can never be self-assigned — only an admin may set it.
+    // NOTE: the first user must be promoted to admin manually (console or script),
+    // because nobody can self-bootstrap the admin role.
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
-      allow create: if signedIn() && request.auth.uid == uid;
-      allow update: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role == 'viewer';
+      allow update: if signedIn() && (
+        (request.auth.uid == uid && request.resource.data.role == 'viewer' && role() == 'viewer')
+        || (request.auth.uid == uid && request.resource.data.role == 'staff' && role() == 'staff')
+        || isAdmin()
+      );
       allow delete: if isAdmin();
     }
 

@@ -2,6 +2,7 @@ import { EntityCrudPage } from "@/pages/crud/EntityCrudPage";
 
 const config = {
   title: "Insurance Types",
+  singular: "Insurance Type",
   description: "Types of insurance used by your policies",
   path: "insuranceTypes",
   fields: [

@@ -2,6 +2,7 @@ import { EntityCrudPage } from "@/pages/crud/EntityCrudPage";
 
 const config = {
   title: "Brokers",
+  singular: "Broker",
   description: "Brokers who handle your policies",
   path: "brokers",
   fields: [
