@@ -4,6 +4,7 @@ import type {
   Company,
   Customer,
   InsuranceType,
+  InsuredSubjectType,
   Policy,
   Reminder,
   SettingsDoc,
@@ -21,6 +22,9 @@ export function useCustomers() {
 }
 export function useInsuranceTypes() {
   return useCollection<InsuranceType>("insuranceTypes");
+}
+export function useInsuredSubjectTypes() {
+  return useCollection<InsuredSubjectType>("insuredSubjectTypes");
 }
 export function usePolicies() {
   return useCollection<Policy>("policies");

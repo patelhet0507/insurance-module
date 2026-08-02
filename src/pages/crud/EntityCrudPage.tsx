@@ -28,7 +28,7 @@ export interface EntityField {
   key: string;
   label: string;
   required?: boolean;
-  type?: "text" | "textarea" | "select";
+  type?: "text" | "textarea" | "select" | "list";
   placeholder?: string;
   options?: { value: string; label: string }[];
   fullWidth?: boolean;
@@ -95,7 +95,9 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
     setEditing(row);
     const tf = config.typeField;
     setForm({
-      ...Object.fromEntries(allFields.map((f) => [f.key, String(row[f.key] ?? "")])),
+      ...Object.fromEntries(
+        allFields.map((f) => [f.key, f.type === "list" ? (Array.isArray(row[f.key]) ? (row[f.key] as string[]).join("\n") : "") : String(row[f.key] ?? "")])
+      ),
       ...(tf ? { [tf.key]: String(row[tf.key] ?? tf.options[0].value) } : {}),
     });
     setDialogOpen(true);
@@ -105,7 +107,12 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload: Record<string, unknown> = { ...form };
+      const payload: Record<string, unknown> = {};
+      for (const f of allFields) {
+        const raw = form[f.key] ?? "";
+        payload[f.key] = f.type === "list" ? raw.split("\n").map((s) => s.trim()).filter(Boolean) : raw;
+      }
+      if (config.typeField) payload[config.typeField.key] = form[config.typeField.key];
       if (editing) {
         await update(`${config.path}/${editing.id}`, payload);
         notifySuccess(`${config.singular} updated`);
@@ -218,7 +225,7 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
                   {f.label}
                   {f.required && " *"}
                 </Label>
-                {f.type === "textarea" ? (
+                {f.type === "textarea" || f.type === "list" ? (
                   <Textarea id={f.key} required={f.required} placeholder={f.placeholder} value={form[f.key] ?? ""} onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))} />
                 ) : f.type === "select" ? (
                   <Select id={f.key} required={f.required} value={form[f.key] ?? ""} onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))}>

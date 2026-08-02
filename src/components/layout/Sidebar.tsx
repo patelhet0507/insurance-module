@@ -14,6 +14,7 @@ import {
   Sun,
   Tags,
   BarChart3,
+  Boxes,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -30,6 +31,7 @@ const navItems = [
   { to: "/companies", label: "Insurance Companies", icon: Building2 },
   { to: "/brokers", label: "Brokers", icon: Handshake },
   { to: "/insurance-types", label: "Insurance Types", icon: Tags },
+  { to: "/insured-subjects", label: "Insured Subjects", icon: Boxes },
   { to: "/reminders", label: "Reminders", icon: Bell },
   { to: "/reports", label: "Reports", icon: BarChart3 },
 ];

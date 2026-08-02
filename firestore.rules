@@ -60,6 +60,10 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if canWrite();
     }
+    match /insuredSubjectTypes/{doc} {
+      allow read: if signedIn();
+      allow write: if canWrite();
+    }
     match /policies/{doc} {
       allow read: if signedIn();
       allow write: if canWrite();

@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { usePolicies, useCustomers, useCompanies, useBrokers, useInsuranceTypes, usePolicy } from "@/hooks/useData";
+import { usePolicies, useCustomers, useCompanies, useBrokers, useInsuranceTypes, useInsuredSubjectTypes, usePolicy } from "@/hooks/useData";
 import { useCreate, useUpdate } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
@@ -39,6 +39,7 @@ export function PolicyFormPage() {
   const { docs: companies } = useCompanies();
   const { docs: brokers } = useBrokers();
   const { docs: insuranceTypes } = useInsuranceTypes();
+  const { docs: subjectTypes } = useInsuredSubjectTypes();
   const { create } = useCreate("policies");
   const { update } = useUpdate();
 
@@ -48,6 +49,8 @@ export function PolicyFormPage() {
     policyNumber: "",
     customerId: "",
     insuredSubject: "",
+    insuredSubjectId: "",
+    subjectDetails: {} as Record<string, string>,
     companyId: "",
     insuranceTypeId: "",
     brokerId: "",
@@ -68,6 +71,8 @@ export function PolicyFormPage() {
         policyNumber: policy.policyNumber || "",
         customerId: policy.customerId || "",
         insuredSubject: policy.insuredSubject || "",
+        insuredSubjectId: policy.insuredSubjectId || "",
+        subjectDetails: policy.subjectDetails || {},
         companyId: policy.companyId || "",
         insuranceTypeId: policy.insuranceTypeId || "",
         brokerId: policy.brokerId || "",
@@ -106,11 +111,22 @@ export function PolicyFormPage() {
     });
   };
 
+  // subject type change: reset detail fields for the new type
+  const setSubject = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const subjectType = subjectTypes.find((t) => t.id === e.target.value);
+    const details: Record<string, string> = {};
+    for (const f of subjectType?.fields ?? []) details[f] = "";
+    setForm((f) => ({ ...f, insuredSubjectId: e.target.value, insuredSubject: subjectType?.name ?? "", subjectDetails: details }));
+  };
+
+  const setDetail = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, subjectDetails: { ...f.subjectDetails, [key]: e.target.value } }));
+
   const canSubmit = useMemo(
     () =>
       form.policyNumber.trim() &&
       form.customerId &&
-      form.insuredSubject.trim() &&
+      form.insuredSubjectId &&
       form.companyId &&
       form.insuranceTypeId &&
       form.premium &&
@@ -134,6 +150,8 @@ export function PolicyFormPage() {
         policyNumber: num,
         customerId: form.customerId,
         insuredSubject: form.insuredSubject.trim() || null,
+        insuredSubjectId: form.insuredSubjectId || null,
+        subjectDetails: form.subjectDetails,
         companyId: form.companyId,
         insuranceTypeId: form.insuranceTypeId,
         brokerId: form.brokerId || null,
@@ -230,9 +248,29 @@ export function PolicyFormPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="insuredSubject">Insured Subject *</Label>
-              <Input id="insuredSubject" required value={form.insuredSubject} onChange={set("insuredSubject")} placeholder="What or where is insured? e.g. Shop, Car, House, Factory…" className={input} />
+              <Label htmlFor="insuredSubjectId">Insured Subject *</Label>
+              <Select id="insuredSubjectId" required value={form.insuredSubjectId} onChange={setSubject} className={input}>
+                <option value="">Select subject…</option>
+                {subjectTypes.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </Select>
             </div>
+            {form.insuredSubjectId && (
+              <div className="grid gap-4 sm:grid-cols-2 sm:col-span-2 rounded-lg border p-4">
+                <p className="text-sm font-medium text-muted-foreground sm:col-span-2">
+                  {form.insuredSubject} details
+                </p>
+                {(subjectTypes.find((t) => t.id === form.insuredSubjectId)?.fields ?? []).map((f) => (
+                  <div key={f} className="space-y-2">
+                    <Label htmlFor={`subject-${f}`}>{f} *</Label>
+                    <Input id={`subject-${f}`} required value={form.subjectDetails[f] ?? ""} onChange={setDetail(f)} className={input} />
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="companyId">Insurance Company *</Label>
               <Select id="companyId" required value={form.companyId} onChange={set("companyId")} className={input}>

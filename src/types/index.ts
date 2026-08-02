@@ -59,11 +59,20 @@ export interface InsuranceType {
   createdAt: string;
 }
 
+export interface InsuredSubjectType {
+  id: string;
+  name: string;
+  fields: string[];
+  createdAt: string;
+}
+
 export interface Policy {
   id: string;
   policyNumber: string;
   customerId: string;
   insuredSubject?: string;
+  insuredSubjectId?: string;
+  subjectDetails?: Record<string, string>;
   companyId: string;
   insuranceTypeId: string;
   brokerId?: string;

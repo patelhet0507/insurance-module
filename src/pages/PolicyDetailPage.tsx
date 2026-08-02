@@ -97,6 +97,13 @@ export function PolicyDetailPage() {
   const infoRows: { label: string; value: React.ReactNode }[] = [
     { label: "Customer", value: customer ? <Link className="hover:underline" to="/customers">{customerDisplayName(customer)}</Link> : "—" },
     { label: "Insured Subject", value: p.insuredSubject || "—" },
+    { label: "Subject Details", value: p.subjectDetails && Object.keys(p.subjectDetails).length ? (
+      <ul className="mt-0.5 space-y-0.5">
+        {Object.entries(p.subjectDetails).map(([k, v]) => (
+          <li key={k}>{k}: <span className="font-medium">{v || "—"}</span></li>
+        ))}
+      </ul>
+    ) : "—" },
     { label: "Insurance Company", value: company ? <Link className="hover:underline" to={`/companies/${company.id}`}>{company.name}</Link> : "—" },
     { label: "Insurance Type", value: insuranceType?.name ?? "—" },
     { label: "Broker", value: broker?.name ?? "—" },
