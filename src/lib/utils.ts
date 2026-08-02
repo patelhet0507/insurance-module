@@ -30,3 +30,14 @@ export function daysUntil(date?: string | Date | null) {
 export function nowIso() {
   return dayjs().toISOString();
 }
+
+export function customerDisplayName(c?: {
+  customerType?: string;
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+} | null) {
+  if (!c) return "—";
+  if (c.customerType === "company" || c.companyName) return c.companyName || "—";
+  return [c.firstName, c.lastName].filter(Boolean).join(" ") || "—";
+}

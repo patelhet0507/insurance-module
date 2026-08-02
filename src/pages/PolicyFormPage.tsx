@@ -17,7 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
 import { CURRENCIES } from "@/lib/constants";
 import { notifyError, notifySuccess } from "@/components/ui/toast";
-import { nowIso } from "@/lib/utils";
+import { nowIso, customerDisplayName } from "@/lib/utils";
 import type { Policy, PolicyStatus } from "@/types";
 
 export function PolicyFormPage() {
@@ -168,7 +168,7 @@ export function PolicyFormPage() {
                 <option value="">Select customer…</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.firstName} {c.lastName}
+                    {customerDisplayName(c)}
                   </option>
                 ))}
               </Select>

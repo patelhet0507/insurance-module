@@ -23,7 +23,7 @@ import { useRemove } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
 import { POLICY_STATUS } from "@/lib/constants";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, customerDisplayName } from "@/lib/utils";
 import { notifySuccess } from "@/components/ui/toast";
 
 export function PoliciesPage() {
@@ -49,10 +49,10 @@ export function PoliciesPage() {
         if (!q) return true;
         const customer = customers.find((c) => c.id === p.customerId);
         const company = companies.find((c) => c.id === p.companyId);
+        const customerName = customerDisplayName(customer).toLowerCase();
         return (
           p.policyNumber.toLowerCase().includes(q) ||
-          customer?.firstName.toLowerCase().includes(q) ||
-          customer?.lastName.toLowerCase().includes(q) ||
+          customerName.includes(q) ||
           company?.name.toLowerCase().includes(q)
         );
       })
@@ -61,7 +61,7 @@ export function PoliciesPage() {
 
   const customerName = (id: string) => {
     const c = customers.find((x) => x.id === id);
-    return c ? `${c.firstName} ${c.lastName}` : "—";
+    return customerDisplayName(c);
   };
   const companyName = (id: string) => companies.find((x) => x.id === id)?.name ?? "—";
 

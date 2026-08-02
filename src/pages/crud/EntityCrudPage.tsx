@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -27,9 +28,17 @@ export interface EntityField {
   key: string;
   label: string;
   required?: boolean;
-  type?: "text" | "textarea";
+  type?: "text" | "textarea" | "select";
   placeholder?: string;
+  options?: { value: string; label: string }[];
   fullWidth?: boolean;
+}
+
+export interface EntityTypeField {
+  key: string;
+  label: string;
+  options: { value: string; label: string }[];
+  fields: Record<string, EntityField[]>;
 }
 
 export interface EntityConfig {
@@ -37,7 +46,8 @@ export interface EntityConfig {
   singular: string;
   description: string;
   path: string;
-  fields: EntityField[];
+  fields?: EntityField[];
+  typeField?: EntityTypeField;
   columns: { key: string; label: string; render?: (row: Record<string, unknown>) => React.ReactNode }[];
   emptyTitle: string;
   emptyDescription: string;
@@ -59,23 +69,35 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
 
   const writable = canWrite(profile?.role);
 
+  const allFields = config.typeField
+    ? Object.values(config.typeField.fields).flat()
+    : (config.fields ?? []);
+  const activeFields = config.typeField
+    ? config.typeField.fields[form[config.typeField.key] ?? ""] ?? []
+    : (config.fields ?? []);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return docs;
     return docs.filter((d) =>
-      config.fields.some((f) => String(d[f.key] ?? "").toLowerCase().includes(q))
+      allFields.some((f) => String(d[f.key] ?? "").toLowerCase().includes(q))
     );
-  }, [docs, search, config]);
+  }, [docs, search, allFields]);
 
   function openCreate() {
     setEditing(null);
     setForm({});
+    if (config.typeField) setForm({ [config.typeField.key]: config.typeField.options[0].value });
     setDialogOpen(true);
   }
 
   function openEdit(row: Record<string, unknown>) {
     setEditing(row);
-    setForm(Object.fromEntries(config.fields.map((f) => [f.key, String(row[f.key] ?? "")])));
+    const tf = config.typeField;
+    setForm({
+      ...Object.fromEntries(allFields.map((f) => [f.key, String(row[f.key] ?? "")])),
+      ...(tf ? { [tf.key]: String(row[tf.key] ?? tf.options[0].value) } : {}),
+    });
     setDialogOpen(true);
   }
 
@@ -182,8 +204,15 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
           <DialogTitle>{editing ? `Edit ${config.singular}` : `New ${config.singular}`}</DialogTitle>
         </DialogHeader>
         <form onSubmit={save} className="space-y-4">
+          {config.typeField && (
+            <TypeFieldSelect
+              typeField={config.typeField}
+              value={form[config.typeField.key] ?? config.typeField.options[0].value}
+              onChange={(v) => setForm((s) => ({ ...s, [config.typeField!.key]: v }))}
+            />
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
-            {config.fields.map((f) => (
+            {activeFields.map((f) => (
               <div key={f.key} className={`space-y-2 ${f.fullWidth ? "sm:col-span-2" : ""}`}>
                 <Label htmlFor={f.key}>
                   {f.label}
@@ -191,6 +220,15 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
                 </Label>
                 {f.type === "textarea" ? (
                   <Textarea id={f.key} required={f.required} placeholder={f.placeholder} value={form[f.key] ?? ""} onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))} />
+                ) : f.type === "select" ? (
+                  <Select id={f.key} required={f.required} value={form[f.key] ?? ""} onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))}>
+                    <option value="">Select…</option>
+                    {f.options?.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </Select>
                 ) : (
                   <Input id={f.key} required={f.required} placeholder={f.placeholder} value={form[f.key] ?? ""} onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))} />
                 )}
@@ -217,6 +255,25 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
         destructive
         onConfirm={removeRow}
       />
+    </div>
+  );
+}
+
+function TypeFieldSelect({ typeField, value, onChange }: {
+  typeField: EntityTypeField;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={typeField.key}>{typeField.label}</Label>
+      <Select id={typeField.key} value={value} onChange={(e) => onChange(e.target.value)}>
+        {typeField.options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </Select>
     </div>
   );
 }

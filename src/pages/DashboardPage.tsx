@@ -27,7 +27,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { usePolicies, useCustomers, useCompanies, useBrokers, useReminders } from "@/hooks/useData";
 import { canWrite } from "@/context/AuthContext";
 import { useAuth } from "@/context/AuthContext";
-import { formatCurrency, formatDate, daysUntil } from "@/lib/utils";
+import { formatCurrency, formatDate, daysUntil, customerDisplayName } from "@/lib/utils";
 import type { Policy } from "@/types";
 
 export function DashboardPage() {
@@ -144,7 +144,7 @@ export function DashboardPage() {
                             {p.policyNumber}
                           </Link>
                         </TableCell>
-                        <TableCell>{customerName(p.customerId)?.firstName ?? "—"}</TableCell>
+                        <TableCell>{customerDisplayName(customerName(p.customerId))}</TableCell>
                         <TableCell>{companyName(p.companyId)?.name ?? "—"}</TableCell>
                         <TableCell>{formatCurrency(p.premium, p.currency)}</TableCell>
                         <TableCell>{formatDate(p.endDate)}</TableCell>

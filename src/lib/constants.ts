@@ -37,3 +37,21 @@ export const REMINDER_CHANNEL_LABEL: Record<ReminderChannel, string> = {
 };
 
 export const CURRENCIES = ["INR"] as const;
+
+export const CUSTOMER_TYPES = [
+  { value: "person", label: "Person" },
+  { value: "company", label: "Company" },
+] as const;
+
+export const GENDERS = ["Male", "Female", "Other"] as const;
+
+export const COMPANY_TYPES = [
+  "Private Limited",
+  "Public Limited",
+  "LLP",
+  "Partnership",
+  "Sole Proprietorship",
+  "One Person Company",
+  "Firm",
+  "Other",
+] as const;

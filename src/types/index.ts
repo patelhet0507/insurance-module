@@ -34,10 +34,16 @@ export interface Broker {
   updatedAt: string;
 }
 
+export type CustomerType = "person" | "company";
+
 export interface Customer {
   id: string;
+  customerType?: CustomerType;
   firstName: string;
-  lastName: string;
+  lastName?: string;
+  gender?: string;
+  companyName?: string;
+  companyType?: string;
   phone?: string;
   email?: string;
   address?: string;

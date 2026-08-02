@@ -24,7 +24,7 @@ import { useCreate, useRemove, useUpdate } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
 import { REMINDER_CHANNELS, REMINDER_CHANNEL_LABEL } from "@/lib/constants";
-import { formatCurrency, formatDate, daysUntil, nowIso } from "@/lib/utils";
+import { formatCurrency, formatDate, daysUntil, nowIso, customerDisplayName } from "@/lib/utils";
 import { notifyError, notifySuccess } from "@/components/ui/toast";
 import type { Reminder, ReminderChannel } from "@/types";
 
@@ -95,7 +95,7 @@ export function PolicyDetailPage() {
   }
 
   const infoRows: { label: string; value: React.ReactNode }[] = [
-    { label: "Customer", value: customer ? <Link className="hover:underline" to={`/customers/${customer.id}`}>{customer.firstName} {customer.lastName}</Link> : "—" },
+    { label: "Customer", value: customer ? <Link className="hover:underline" to={`/customers/${customer.id}`}>{customerDisplayName(customer)}</Link> : "—" },
     { label: "Insurance Company", value: company ? <Link className="hover:underline" to={`/companies/${company.id}`}>{company.name}</Link> : "—" },
     { label: "Insurance Type", value: insuranceType?.name ?? "—" },
     { label: "Broker", value: broker?.name ?? "—" },
