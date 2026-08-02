@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { PremiumSchedule } from "@/components/shared/PremiumSchedule";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -155,6 +156,10 @@ export function PolicyDetailPage() {
                 <p className="mt-0.5 text-sm whitespace-pre-wrap">{p.notes}</p>
               </div>
             )}
+          </CardContent>
+          <CardContent>
+            <p className="mb-2 text-sm font-medium">Premium Schedule</p>
+            <PremiumSchedule term={p.term} startDate={p.startDate} premium={p.premium} currency={p.currency} />
           </CardContent>
         </Card>
 
