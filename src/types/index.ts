@@ -69,6 +69,8 @@ export interface Policy {
   brokerId?: string;
   premium: number;
   currency: string;
+  term?: "quarterly" | "yearly" | "3years";
+  paymentMode?: string;
   startDate: string;
   endDate: string;
   status: PolicyStatus;

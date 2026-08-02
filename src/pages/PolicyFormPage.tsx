@@ -15,9 +15,10 @@ import { usePolicies, useCustomers, useCompanies, useBrokers, useInsuranceTypes,
 import { useCreate, useUpdate } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
-import { CURRENCIES } from "@/lib/constants";
+import { CURRENCIES, POLICY_TERMS, POLICY_TERM_MONTHS, PAYMENT_MODES } from "@/lib/constants";
 import { notifyError, notifySuccess } from "@/components/ui/toast";
 import { nowIso, customerDisplayName } from "@/lib/utils";
+import dayjs from "dayjs";
 import type { Policy, PolicyStatus } from "@/types";
 
 export function PolicyFormPage() {
@@ -43,7 +44,9 @@ export function PolicyFormPage() {
     insuranceTypeId: "",
     brokerId: "",
     premium: "",
-    currency: "USD",
+    currency: "INR",
+    term: "yearly" as string,
+    paymentMode: "Yearly" as string,
     startDate: "",
     endDate: "",
     status: "pending" as PolicyStatus,
@@ -61,7 +64,9 @@ export function PolicyFormPage() {
         insuranceTypeId: policy.insuranceTypeId || "",
         brokerId: policy.brokerId || "",
         premium: policy.premium != null ? String(policy.premium) : "",
-        currency: policy.currency || "USD",
+        currency: policy.currency || "INR",
+        term: policy.term || "yearly",
+        paymentMode: policy.paymentMode || "Yearly",
         startDate: policy.startDate || "",
         endDate: policy.endDate || "",
         status: policy.status || "pending",
@@ -72,6 +77,26 @@ export function PolicyFormPage() {
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  // term change: recompute endDate from startDate + term months
+  const setTerm = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const term = e.target.value;
+    setForm((f) => {
+      const months = POLICY_TERM_MONTHS[term as keyof typeof POLICY_TERM_MONTHS];
+      const endDate = f.startDate && months ? dayjs(f.startDate).add(months, "month").format("YYYY-MM-DD") : f.endDate;
+      return { ...f, term, endDate };
+    });
+  };
+
+  // startDate change: keep manual endDate unless it was auto-filled, then recompute only if term set
+  const setStartDate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const startDate = e.target.value;
+    setForm((f) => {
+      const months = POLICY_TERM_MONTHS[f.term as keyof typeof POLICY_TERM_MONTHS];
+      const endDate = startDate && months ? dayjs(startDate).add(months, "month").format("YYYY-MM-DD") : f.endDate;
+      return { ...f, startDate, endDate };
+    });
+  };
 
   const canSubmit = useMemo(
     () =>
@@ -106,6 +131,8 @@ export function PolicyFormPage() {
         brokerId: form.brokerId || null,
         premium: parseFloat(form.premium),
         currency: form.currency,
+        term: form.term,
+        paymentMode: form.paymentMode,
         startDate: form.startDate,
         endDate: form.endDate,
         status: form.status,
@@ -230,7 +257,27 @@ export function PolicyFormPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="startDate">Start Date *</Label>
-              <Input id="startDate" required type="date" value={form.startDate} onChange={set("startDate")} className={input} />
+              <Input id="startDate" required type="date" value={form.startDate} onChange={setStartDate} className={input} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="term">Term *</Label>
+              <Select id="term" required value={form.term} onChange={setTerm} className={input}>
+                {POLICY_TERMS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="paymentMode">Payment Mode *</Label>
+              <Select id="paymentMode" required value={form.paymentMode} onChange={set("paymentMode")} className={input}>
+                {PAYMENT_MODES.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="endDate">End Date *</Label>

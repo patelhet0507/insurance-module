@@ -38,6 +38,26 @@ export const REMINDER_CHANNEL_LABEL: Record<ReminderChannel, string> = {
 
 export const CURRENCIES = ["INR"] as const;
 
+export const POLICY_TERMS = [
+  { value: "quarterly", label: "Quarterly" },
+  { value: "yearly", label: "Yearly" },
+  { value: "3years", label: "3 Years" },
+] as const;
+
+export const POLICY_TERM_MONTHS: Record<(typeof POLICY_TERMS)[number]["value"], number> = {
+  quarterly: 3,
+  yearly: 12,
+  "3years": 36,
+};
+
+export const POLICY_TERM_LABEL: Record<(typeof POLICY_TERMS)[number]["value"], string> = {
+  quarterly: "Quarterly",
+  yearly: "Yearly",
+  "3years": "3 Years",
+};
+
+export const PAYMENT_MODES = ["Quarterly", "Yearly"] as const;
+
 export const CUSTOMER_TYPES = [
   { value: "person", label: "Person" },
   { value: "company", label: "Company" },

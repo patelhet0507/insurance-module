@@ -23,7 +23,7 @@ import {
 import { useCreate, useRemove, useUpdate } from "@/hooks/useFirestore";
 import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
-import { REMINDER_CHANNELS, REMINDER_CHANNEL_LABEL } from "@/lib/constants";
+import { REMINDER_CHANNELS, REMINDER_CHANNEL_LABEL, POLICY_TERM_LABEL } from "@/lib/constants";
 import { formatCurrency, formatDate, daysUntil, nowIso, customerDisplayName } from "@/lib/utils";
 import { notifyError, notifySuccess } from "@/components/ui/toast";
 import type { Reminder, ReminderChannel } from "@/types";
@@ -101,6 +101,8 @@ export function PolicyDetailPage() {
     { label: "Insurance Type", value: insuranceType?.name ?? "—" },
     { label: "Broker", value: broker?.name ?? "—" },
     { label: "Premium", value: formatCurrency(p.premium, p.currency) },
+    { label: "Term", value: p.term ? POLICY_TERM_LABEL[p.term] : "—" },
+    { label: "Payment Mode", value: p.paymentMode || "—" },
     { label: "Start Date", value: formatDate(p.startDate) },
     { label: "End Date", value: formatDate(p.endDate) },
     {
