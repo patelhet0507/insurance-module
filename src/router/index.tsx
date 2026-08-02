@@ -12,6 +12,7 @@ function lazyNamed<T extends string>(loader: () => Promise<Record<T, ComponentTy
   });
 }
 
+const LandingPage = lazyNamed(() => import("@/pages/LandingPage"), "LandingPage");
 const LoginPage = lazyNamed(() => import("@/pages/LoginPage"), "LoginPage");
 const DashboardPage = lazyNamed(() => import("@/pages/DashboardPage"), "DashboardPage");
 const PoliciesPage = lazyNamed(() => import("@/pages/PoliciesPage"), "PoliciesPage");
@@ -41,6 +42,11 @@ function Page({ children }: { children: ReactNode }) {
 
 export const router = createBrowserRouter([
   {
+    path: "/",
+    errorElement: <RouteError />,
+    element: <LandingPage />,
+  },
+  {
     path: "/login",
     errorElement: <RouteError />,
     element: (
@@ -57,7 +63,7 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <Page><DashboardPage /></Page> },
+      { path: "dashboard", element: <Page><DashboardPage /></Page> },
       { path: "policies", element: <Page><PoliciesPage /></Page> },
       { path: "policies/new", element: <Page><PolicyFormPage /></Page> },
       { path: "policies/:id", element: <Page><PolicyDetailPage /></Page> },
