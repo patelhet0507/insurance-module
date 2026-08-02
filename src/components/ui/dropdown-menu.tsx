@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 interface DropdownProps {
@@ -10,12 +11,19 @@ interface DropdownProps {
 
 export function DropdownMenu({ trigger, children, align = "end", className }: DropdownProps) {
   const [open, setOpen] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
     const onPointerDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (
+        triggerRef.current?.contains(e.target as Node) ||
+        menuRef.current?.contains(e.target as Node)
+      ) {
+        return;
+      }
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("pointerdown", onPointerDown);
@@ -26,20 +34,31 @@ export function DropdownMenu({ trigger, children, align = "end", className }: Dr
     };
   }, [open]);
 
+  const rect = triggerRef.current?.getBoundingClientRect();
+  const style: React.CSSProperties = rect
+    ? {
+        top: rect.bottom + 4,
+        left: Math.min(rect.left, Math.max(8, window.innerWidth - 176)),
+      }
+    : {};
+
   return (
-    <div className="relative inline-block text-left" ref={ref}>
+    <div className="inline-block" ref={triggerRef}>
       <div onClick={() => setOpen((o) => !o)}>{trigger}</div>
-      {open && (
-        <div
-          className={cn(
-            "absolute z-50 mt-1 min-w-[10rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
-            align === "end" ? "right-0" : "left-0",
-            className
-          )}
-        >
-          {children(() => setOpen(false))}
-        </div>
-      )}
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            style={style}
+            className={cn(
+              "fixed z-50 mt-1 min-w-[10rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+              className
+            )}
+          >
+            {children(() => setOpen(false))}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
