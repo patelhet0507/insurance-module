@@ -96,7 +96,7 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
     const tf = config.typeField;
     setForm({
       ...Object.fromEntries(
-        allFields.map((f) => [f.key, f.type === "list" ? (Array.isArray(row[f.key]) ? (row[f.key] as string[]).join("\n") : "") : String(row[f.key] ?? "")])
+        allFields.map((f) => [f.key, f.type === "list" ? listToString(row[f.key]) : String(row[f.key] ?? "")])
       ),
       ...(tf ? { [tf.key]: String(row[tf.key] ?? tf.options[0].value) } : {}),
     });
@@ -110,7 +110,7 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
       const payload: Record<string, unknown> = {};
       for (const f of allFields) {
         const raw = form[f.key] ?? "";
-        payload[f.key] = f.type === "list" ? raw.split("\n").map((s) => s.trim()).filter(Boolean) : raw;
+        payload[f.key] = f.type === "list" ? stringToList(raw) : raw;
       }
       if (config.typeField) payload[config.typeField.key] = form[config.typeField.key];
       if (editing) {
@@ -225,7 +225,9 @@ export function EntityCrudPage({ config }: { config: EntityConfig }) {
                   {f.label}
                   {f.required && " *"}
                 </Label>
-                {f.type === "textarea" || f.type === "list" ? (
+                {f.type === "list" ? (
+                  <ListFieldEditor value={form[f.key] ?? ""} onChange={(v) => setForm((s) => ({ ...s, [f.key]: v }))} placeholder={f.placeholder} />
+                ) : f.type === "textarea" ? (
                   <Textarea id={f.key} required={f.required} placeholder={f.placeholder} value={form[f.key] ?? ""} onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))} />
                 ) : f.type === "select" ? (
                   <Select id={f.key} required={f.required} value={form[f.key] ?? ""} onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))}>
@@ -281,6 +283,69 @@ function TypeFieldSelect({ typeField, value, onChange }: {
           </option>
         ))}
       </Select>
+    </div>
+  );
+}
+
+type ListItem = { name: string; required?: boolean };
+
+function listToString(value: unknown): string {
+  if (!Array.isArray(value)) return "";
+  return value
+    .map((v) => {
+      const item = typeof v === "string" ? { name: v } : (v as ListItem);
+      return item.name + (item.required ? " *" : "");
+    })
+    .join("\n");
+}
+
+function stringToList(value: string): ListItem[] {
+  return value
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => (s.endsWith(" *") ? { name: s.slice(0, -2).trim(), required: true } : { name: s, required: false }));
+}
+
+/** Editor for list fields; each item has a name and an optional "required" toggle. */
+function ListFieldEditor({ value, onChange, placeholder }: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const [items, setItems] = useState<ListItem[]>(stringToList(value));
+  const emit = (next: ListItem[]) => {
+    setItems(next);
+    onChange(next.map((i) => i.name + (i.required ? " *" : "")).join("\n"));
+  };
+  const update = (idx: number, patch: Partial<ListItem>) =>
+    emit(items.map((i, j) => (j === idx ? { ...i, ...patch } : i)));
+  return (
+    <div className="space-y-2">
+      {items.map((item, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          <Input
+            value={item.name}
+            onChange={(e) => update(idx, { name: e.target.value })}
+            placeholder={placeholder}
+          />
+          <label className="flex shrink-0 cursor-pointer items-center gap-1.5 text-sm">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-border accent-primary"
+              checked={Boolean(item.required)}
+              onChange={(e) => update(idx, { required: e.target.checked })}
+            />
+            Required
+          </label>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => emit(items.filter((_, j) => j !== idx))}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => emit([...items, { name: "" }])}>
+        <Plus className="h-4 w-4" /> Add field
+      </Button>
     </div>
   );
 }

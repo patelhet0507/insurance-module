@@ -1,5 +1,6 @@
 import { EntityCrudPage, type EntityConfig } from "@/pages/crud/EntityCrudPage";
 import { Badge } from "@/components/ui/badge";
+import { normalizeSubjectFields } from "@/lib/utils";
 
 const config: EntityConfig = {
   title: "Insured Subjects",
@@ -21,19 +22,21 @@ const config: EntityConfig = {
     {
       key: "fields",
       label: "Details",
-      render: (row) => (
-        <div className="flex flex-wrap gap-1">
-          {Array.isArray(row.fields) && (row.fields as string[]).length > 0 ? (
-            (row.fields as string[]).map((f) => (
-              <Badge key={f} variant="secondary">
-                {f}
+      render: (row) => {
+        const fields = normalizeSubjectFields(row.fields as Array<string | { name: string; required?: boolean }> | undefined);
+        return fields.length ? (
+          <div className="flex flex-wrap gap-1">
+            {fields.map((f) => (
+              <Badge key={f.name} variant="secondary">
+                {f.name}
+                {f.required && <span className="ml-1 text-destructive">*</span>}
               </Badge>
-            ))
-          ) : (
-            <span className="text-muted-foreground">No details configured</span>
-          )}
-        </div>
-      ),
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">No details configured</span>
+        );
+      },
     },
   ],
   emptyTitle: "No subject types yet",

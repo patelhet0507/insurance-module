@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { canWrite } from "@/context/AuthContext";
 import { CURRENCIES, POLICY_TERMS, POLICY_TERM_MONTHS, PAYMENT_MODES } from "@/lib/constants";
 import { notifyError, notifySuccess } from "@/components/ui/toast";
-import { nowIso, customerDisplayName } from "@/lib/utils";
+import { nowIso, customerDisplayName, normalizeSubjectFields } from "@/lib/utils";
 import dayjs from "dayjs";
 import type { Policy, PolicyStatus } from "@/types";
 
@@ -108,24 +108,27 @@ export function PolicyFormPage() {
   const setSubject = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const subjectType = subjectTypes.find((t) => t.id === e.target.value);
     const details: Record<string, string> = {};
-    for (const f of subjectType?.fields ?? []) details[f] = "";
+    for (const f of normalizeSubjectFields(subjectType?.fields)) details[f.name] = "";
     setForm((f) => ({ ...f, insuredSubjectId: e.target.value, insuredSubject: subjectType?.name ?? "", subjectDetails: details }));
   };
 
   const setDetail = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, subjectDetails: { ...f.subjectDetails, [key]: e.target.value } }));
 
+  const subjectFields = normalizeSubjectFields(subjectTypes.find((t) => t.id === form.insuredSubjectId)?.fields);
+
   const canSubmit = useMemo(
     () =>
       form.policyNumber.trim() &&
       form.customerId &&
       form.insuredSubjectId &&
+      subjectFields.every((f) => !f.required || (form.subjectDetails[f.name] ?? "").trim()) &&
       form.companyId &&
       form.insuranceTypeId &&
       form.premium &&
       form.startDate &&
       form.endDate,
-    [form]
+    [form, subjectFields]
   );
 
   async function handleSubmit(e: React.FormEvent) {
@@ -234,19 +237,22 @@ export function PolicyFormPage() {
                 ))}
               </Select>
             </div>
-            {form.insuredSubjectId && (
-              <div className="grid gap-4 sm:grid-cols-2 sm:col-span-2 rounded-lg border p-4">
-                <p className="text-sm font-medium text-muted-foreground sm:col-span-2">
-                  {form.insuredSubject} details
-                </p>
-                {(subjectTypes.find((t) => t.id === form.insuredSubjectId)?.fields ?? []).map((f) => (
-                  <div key={f} className="space-y-2">
-                    <Label htmlFor={`subject-${f}`}>{f} *</Label>
-                    <Input id={`subject-${f}`} required value={form.subjectDetails[f] ?? ""} onChange={setDetail(f)} className={input} />
+                {(subjectFields.length > 0) && (
+                  <div className="grid gap-4 sm:grid-cols-2 sm:col-span-2 rounded-lg border p-4">
+                    <p className="text-sm font-medium text-muted-foreground sm:col-span-2">
+                      {form.insuredSubject} details
+                    </p>
+                    {subjectFields.map((f) => (
+                      <div key={f.name} className="space-y-2">
+                        <Label htmlFor={`subject-${f.name}`}>
+                          {f.name}
+                          {f.required && " *"}
+                        </Label>
+                        <Input id={`subject-${f.name}`} required={f.required} value={form.subjectDetails[f.name] ?? ""} onChange={setDetail(f.name)} className={input} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                )}
             <div className="space-y-2">
               <Label htmlFor="companyId">Insurance Company *</Label>
               <Select id="companyId" required value={form.companyId} onChange={set("companyId")} className={input}>

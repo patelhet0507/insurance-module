@@ -49,6 +49,16 @@ export interface ScheduleRow {
   amount: number;
 }
 
+export interface SubjectField {
+  name: string;
+  required?: boolean;
+}
+
+/** Normalize a subject type's fields (legacy plain strings or {name, required}) into {name, required}. */
+export function normalizeSubjectFields(fields?: Array<string | SubjectField>) {
+  return (fields ?? []).map((f) => (typeof f === "string" ? { name: f, required: false } : { name: f.name, required: Boolean(f.required) }));
+}
+
 /** Premium payment schedule: per-quarter rows (Term=Quarterly) or per-year rows otherwise. */
 export function policySchedule(term?: string, startDate?: string, premium?: number | string) {
   if (!term || !startDate) return null;
