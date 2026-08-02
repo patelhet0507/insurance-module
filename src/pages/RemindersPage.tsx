@@ -45,27 +45,38 @@ export function RemindersPage() {
 
   const writable = canWrite(profile?.role);
 
+  const inWindow = (r: (typeof reminders)[number], w: Window) => {
+    if (w === "all") return true;
+    const d = daysUntil(r.dueDate);
+    if (d == null) return false;
+    switch (w) {
+      case "near30":
+        return Math.abs(d) <= 30;
+      case "next30":
+        return d >= 0 && d <= 30;
+      case "next60":
+        return d >= 0 && d <= 60;
+      case "next90":
+        return d >= 0 && d <= 90;
+      default:
+        return true;
+    }
+  };
+
+  const statusRows = useMemo(() => reminders.filter((r) => statusFilter === "all" || r.status === statusFilter), [
+    reminders,
+    statusFilter,
+  ]);
+
+  const windowCounts = useMemo(
+    () => WINDOWS.map((w) => ({ ...w, count: statusRows.filter((r) => inWindow(r, w.value)).length })),
+    [statusRows]
+  );
+
   const filtered = useMemo(() => {
-    const rows = [...reminders].filter((r) => {
-      if (statusFilter !== "all" && r.status !== statusFilter) return false;
-      if (windowFilter === "all") return true;
-      const d = daysUntil(r.dueDate);
-      if (d == null) return false;
-      switch (windowFilter) {
-        case "near30":
-          return Math.abs(d) <= 30;
-        case "next30":
-          return d >= 0 && d <= 30;
-        case "next60":
-          return d >= 0 && d <= 60;
-        case "next90":
-          return d >= 0 && d <= 90;
-        default:
-          return true;
-      }
-    });
+    const rows = statusRows.filter((r) => inWindow(r, windowFilter));
     return rows.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
-  }, [reminders, statusFilter, windowFilter]);
+  }, [statusRows, windowFilter]);
 
   const policyNumber = (id: string) => policies.find((p) => p.id === id)?.policyNumber ?? "—";
 
@@ -97,7 +108,7 @@ export function RemindersPage() {
           ))}
         </Select>
         <div className="flex flex-wrap gap-1">
-          {WINDOWS.map((w) => (
+          {windowCounts.map((w) => (
             <Button
               key={w.value}
               variant="ghost"
@@ -108,7 +119,7 @@ export function RemindersPage() {
               )}
               onClick={() => setWindowFilter(w.value)}
             >
-              {w.label}
+              {w.label} <span className="ml-1 rounded-full bg-muted px-1.5 text-xs font-semibold">{w.count}</span>
             </Button>
           ))}
         </div>
