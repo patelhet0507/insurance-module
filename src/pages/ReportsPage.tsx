@@ -18,7 +18,7 @@ import {
 import { Link } from "react-router-dom";
 import { usePolicies, useCustomers, useCompanies, useBrokers, useInsuranceTypes } from "@/hooks/useData";
 import { POLICY_STATUS } from "@/lib/constants";
-import { formatCurrency, formatDate, customerDisplayName } from "@/lib/utils";
+import { formatCurrency, formatCurrencyExact, truncate2, formatDate, customerDisplayName } from "@/lib/utils";
 import type { Policy, PolicyStatus } from "@/types";
 
 type ReportKey = "all" | "company" | "broker" | "insuranceType" | "customer" | "status";
@@ -157,13 +157,13 @@ export function ReportsPage() {
           p.status,
           p.startDate,
           p.endDate,
-          p.premium.toFixed(2),
+          truncate2(p.premium),
           p.currency,
         ].join(",")
       );
     } else {
       header = ["Entity", "Policies", "Active", "Expired", "Premium"];
-      lines = rows.map((r) => [r.label, r.count, r.active, r.expired, r.premium.toFixed(2)].join(","));
+      lines = rows.map((r) => [r.label, r.count, r.active, r.expired, truncate2(r.premium)].join(","));
     }
     const blob = new Blob(["\uFEFF" + [header.join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
@@ -306,7 +306,7 @@ export function ReportsPage() {
                             <TableCell>
                               <StatusBadge status={p.status} kind="policy" />
                             </TableCell>
-                            <TableCell className="text-right">{formatCurrency(p.premium, p.currency)}</TableCell>
+                            <TableCell className="text-right">{formatCurrencyExact(p.premium, p.currency)}</TableCell>
                             <TableCell>{formatDate(p.endDate)}</TableCell>
                           </TableRow>
                         ))}
@@ -335,7 +335,7 @@ export function ReportsPage() {
                           <TableCell className="text-right">{r.count}</TableCell>
                           <TableCell className="text-right">{r.active}</TableCell>
                           <TableCell className="text-right">{r.expired}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(r.premium)}</TableCell>
+                          <TableCell className="text-right">{formatCurrencyExact(r.premium)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

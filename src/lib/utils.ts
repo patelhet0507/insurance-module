@@ -12,6 +12,24 @@ export function formatCurrency(amount?: number | null, currency = "INR") {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
 }
 
+/** Currency with exact 2 decimals — truncates, never rounds up (for per-unit amounts). */
+export function formatCurrencyExact(amount?: number | null, currency = "INR") {
+  if (amount == null) return "—";
+  const exact = Math.floor((amount + Number.EPSILON) * 100) / 100;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(exact);
+}
+
+/** Raw number truncated to exactly 2 decimals, never rounded up. */
+export function truncate2(amount?: number | null) {
+  if (amount == null) return "";
+  return (Math.floor((amount + Number.EPSILON) * 100) / 100).toFixed(2);
+}
+
 export function formatDate(date?: string | Date | null) {
   if (!date) return "—";
   return dayjs(date).format("MMM D, YYYY");
